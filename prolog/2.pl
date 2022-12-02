@@ -38,18 +38,18 @@ shape_value(rock, 1).
 shape_value(paper, 2).
 shape_value(scissors, 3).
 
-round_result(rock, rock, draw) :- !.
-round_result(rock, paper, win) :- !.
-round_result(rock, scissors, loss) :- !.
-round_result(paper, rock, loss) :- !.
-round_result(paper, paper, draw) :- !.
-round_result(paper, scissors, win) :- !.
-round_result(scissors, rock, win) :- !.
-round_result(scissors, paper, loss) :- !.
-round_result(scissors, scissors, draw) :- !.
+:- op(500, xfx, beats).
 
-result_value(draw, 3).
+beats(rock, scissors).
+beats(scissors, paper).
+beats(paper, rock).
+
+round_result(X, X, draw) :- !.
+round_result(X, Y, win) :- Y beats X, !.
+round_result(X, Y, loss) :- X beats Y, !.
+
 result_value(loss, 0).
+result_value(draw, 3).
 result_value(win, 6).
 
 round_outcome(X, Y, Res, Value) :-
