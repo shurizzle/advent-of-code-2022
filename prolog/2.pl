@@ -1,74 +1,72 @@
-:- [prelude].
+:- module('2', [parse//1, part1/2, part2/2]).
 
-input_file("inputs/2.txt").
+:- use_module(library(charsio)).
+:- use_module(library(lists)).
+:- use_module(library(lambda)).
 
-% tests {{{
-tinput("A Y
-B X
-C Z").
+blank --> [C], { char_type(C, whitespace) }.
+blanks --> blank, !, blanks.
+blanks --> [].
 
-test1(Data) :- part1(Data, Res), print1(Res), nl.
-test1_from_string(Input) :- input_from_string(Input, Data), test1(Data).
-test1 :- tinput(Data), test1_from_string(Data).
+nl --> "\n".
 
-test2(Data) :- part2(Data, Res), print2(Res), nl.
-test2_from_string(Input) :- input_from_string(Input, Data), test2(Data).
-test2 :- tinput(Data), test2_from_string(Data).
+opponent(rock) --> "A".
+opponent(paper) --> "B".
+opponent(scissors) --> "C".
 
-test(Data) :- test1(Data), test2(Data).
-test_from_string(Input) :- input_from_string(Input, Data), test(Data).
-test :- tinput(Input), test_from_string(Input).
-% }}}
+me(rock) --> "X".
+me(paper) --> "Y".
+me(scissors) --> "Z".
 
-print1(Res) :- print(Res).
-print2(Res) :- print(Res).
+line(O:M) --> opponent(O), " ", me(M).
 
-parse(Lines) --> blanks, list_of(L, raw_line(line(L)), Lines), blanks.
-line(O:M) --> opponent_play(O), white, my_play(M).
+parse([O:M|Xs]) --> blanks, line(O:M), !, parse_(Xs), blanks.
 
-opponent_play(rock) --> "A".
-opponent_play(paper) --> "B".
-opponent_play(scissors) --> "C".
+parse_([O:M|Xs]) --> nl, line(O:M), !, parse_(Xs).
+parse_([]) --> [].
 
-my_play(rock) --> "X".
-my_play(paper) --> "Y".
-my_play(scissors) --> "Z".
+%! round_outcome(?Opponent, ?Me, ?Result, +Value) is det
+%! round_outcome(+Opponent, +Me, ?Result, ?Value) is det
+%! round_outcome(+Opponent, ?Me, +Result, ?Value) is det
+%! round_outcome(?Opponent, +Me, +Result, ?Value) is det
+%! round_outcome(?Opponent, ?Me, ?Result, ?Value) is nondet
+round_outcome(O, M, R, V) :-
+  nonvar(V), !,
+  once(round_outcome_(O, M, R, V)).
+round_outcome(O, M, R, V) :-
+  ( nonvar(O), (nonvar(M); nonvar(R))
+  ; nonvar(R), nonvar(M) ), !,
+  once(round_outcome_(O, M, R, V)).
+round_outcome(O, M, R, V) :-
+  round_outcome_(O, M, R, V).
 
-shape_value(rock, 1).
-shape_value(paper, 2).
-shape_value(scissors, 3).
+round_outcome_(rock, rock, draw, 4).
+round_outcome_(rock, paper, win, 8).
+round_outcome_(rock, scissors, loss, 3).
+round_outcome_(paper, rock, loss, 1).
+round_outcome_(paper, paper, draw, 5).
+round_outcome_(paper, scissors, win, 9).
+round_outcome_(scissors, rock, win, 7).
+round_outcome_(scissors, paper, loss, 2).
+round_outcome_(scissors, scissors, draw, 6).
 
-:- op(500, xfx, beats).
+%! remap_me(+Shape, ?Result) is det
+%! remap_me(?Shape, +Result) is det
+%! remap_me(?Shape, ?Result) is nondet
+remap_me(rock, loss).
+remap_me(paper, draw).
+remap_me(scissors, win).
 
-beats(rock, scissors).
-beats(scissors, paper).
-beats(paper, rock).
-
-round_result(X, X, draw) :- !.
-round_result(X, Y, win) :- Y beats X, !.
-round_result(X, Y, loss) :- X beats Y, !.
-
-result_value(loss, 0).
-result_value(draw, 3).
-result_value(win, 6).
-
-round_outcome(X, Y, Res, Value) :-
-  round_result(X, Y, Res),
-  shape_value(Y, V0),
-  round_result(X, Y, RR),
-  result_value(RR, V1),
-  Value is V0 + V1.
-
-convert_my_move(rock, loss).
-convert_my_move(paper, draw).
-convert_my_move(scissors, win).
-
-part1(Data, Res) :- foldl([X:Y, Acc, Out]>>(
-    round_outcome(X, Y, _, V),
-    Out is Acc + V
+part1(Data, Res) :-
+  foldl(\OM^Acc0^Acc^(
+    O:M = OM,
+    round_outcome(O, M, _, V),
+    Acc is Acc0 + V
   ), Data, 0, Res).
-part2(Data, Res) :- foldl([X:Res0, Acc, Out]>>(
-    convert_my_move(Res0, Res),
-    round_outcome(X, _, Res, V),
-    Out is Acc + V
+part2(Data, Res) :-
+  foldl(\OR^Acc0^Acc^(
+    O:Res0 = OR,
+    remap_me(Res0, Res),
+    round_outcome(O, _, Res, V),
+    Acc is Acc0 + V
   ), Data, 0, Res).

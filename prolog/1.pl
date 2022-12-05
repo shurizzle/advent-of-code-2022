@@ -1,35 +1,32 @@
-:- [prelude].
+:- module('1', [parse//1, part1/2, part2/2]).
 
-input_file("inputs/1.txt").
+:- use_module(library(charsio)).
+:- use_module(library(lists)).
+:- use_module(library(ordsets)).
 
-% tests {{{
-tinput("").
+blank --> [C], { char_type(C, whitespace) }.
+blanks --> blank, !, blanks.
+blanks --> [].
 
-test1(Data) :- part1(Data, Res), print1(Res), nl.
-test1_from_string(Input) :- input_from_string(Input, Data), test1(Data).
-test1 :- tinput(Data), test1_from_string(Data).
+nl --> "\n".
 
-test2(Data) :- part2(Data, Res), print2(Res), nl.
-test2_from_string(Input) :- input_from_string(Input, Data), test2(Data).
-test2 :- tinput(Data), test2_from_string(Data).
+digit(D) --> [D], { char_type(D, decimal_digit) }.
 
-test(Data) :- test1(Data), test2(Data).
-test_from_string(Input) :- input_from_string(Input, Data), test(Data).
-test :- tinput(Input), test_from_string(Input).
-% }}}
+integer(I) --> digit(D), integer_(Ds), { number_chars(I, [D|Ds]) }.
+integer_([D|Ds]) --> digit(D), !, integer_(Ds).
+integer_([]) --> [].
 
-print1(Res) :- print(Res).
-print2(Res) :- print(Res).
+elf(E) --> integer(I), elf_(Is), { sum_list([I|Is], E) }.
+elf_([I|Is]) --> nl, integer(I), !, elf_(Is).
+elf_([]) --> [].
 
 parse(Es) -->
-  blanks, list_of(E, elf(E), blanks_to_nl, UEs), blanks,
-  { list_to_ord_set(UEs, Es) }.
-elf(E) -->
-  list_of(I, raw_line(integer(I)), Cs),
-  { length(Cs, L), L > 0,
-    sum_list(Cs, E) }.
+  blanks, elf(E), !, parse_(Es0), blanks,
+  { list_to_ord_set([E|Es0], Es) }.
+parse_([E|Es]) --> nl, nl, elf(E), !, parse_(Es).
+parse_([]) --> [].
 
-part1(Data, Res) :- last(Data, Res).
+part1(Data, Res) :- once(append(_, [Res], Data)).
 part2(Data, Res) :-
   length(Top3, 3),
   once(append(_, Top3, Data)),
