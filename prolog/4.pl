@@ -2,6 +2,8 @@
 
 :- use_module(library(charsio)).
 :- use_module(library(lists)).
+:- use_module(library(lambda)).
+:- use_module(aggregate).
 
 :- op(900, xfx, ..).
 
@@ -38,16 +40,14 @@ overlaps(AStart..AEnd, BStart..BEnd) :-
   BStart =< AEnd.
 
 part1(Data, Res) :-
-  findall(1,
-    ( member((A,B), Data),
-      once((A contains B; B contains A))
-    ),
-    Xs),
-  length(Xs, Res).
+  countall(1,
+          ( member((A,B), Data),
+            once((A contains B; B contains A))
+          ),
+          Res).
 part2(Data, Res) :-
-  findall(1,
-    ( member((A,B), Data),
-      A overlaps B
-    ),
-    Xs),
-  length(Xs, Res).
+  countall(1,
+          ( member((A,B), Data),
+            A overlaps B
+          ),
+          Res).
