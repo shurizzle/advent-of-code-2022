@@ -13,15 +13,17 @@ foldall_nesting(Value, C, ID) :-
   bb_put(ID, Value),
   bb_put(i_foldall_counter, C).
 
-:- meta_predicate foldall(0, ?, 0, ?, ?).
+:- meta_predicate foldall(3, ?, 0, ?, ?).
 
 foldall(Reducer, Template, Goal, V0, V) :-
   foldall_nesting(V0, C, ID),
   (   setup_call_cleanup(true,
                          (   Goal,
                              bb_get(ID, V1),
-                             call(Reducer, Template, V1, V2),
-                             bb_put(ID, V2),
+                             (    call(Reducer, Template, V1, V2)
+                             ->   bb_put(ID, +V2)
+                             ;    bb_put(ID, false), !
+                             ),
                              fail
                          ),
                          (   bb_get(i_foldall_counter, C) ->
@@ -29,8 +31,10 @@ foldall(Reducer, Template, Goal, V0, V) :-
                              bb_put(i_foldall_counter, C1)
                          ;   true
                          ))
-  ;   bb_get(ID, V),
-      bb_put(ID, nil)).
+  ;   setup_call_cleanup(true,
+                         bb_get(ID, +V),
+                         bb_put(ID, nil))
+  ).
 
 count_(_, Acc0, Acc) :- Acc is Acc0+1.
 

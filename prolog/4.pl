@@ -2,7 +2,6 @@
 
 :- use_module(library(charsio)).
 :- use_module(library(lists)).
-:- use_module(library(lambda)).
 :- use_module(aggregate).
 
 :- op(900, xfx, ..).
