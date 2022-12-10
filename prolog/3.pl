@@ -4,6 +4,7 @@
 :- use_module(library(between)).
 :- use_module(library(lists)).
 :- use_module(library(lambda)).
+:- use_module(aggregate).
 
 blank --> [C], { char_type(C, whitespace) }.
 blanks --> blank, !, blanks.
@@ -60,12 +61,11 @@ part1(Data, Res) :-
     Acc is Acc0 + I
   ), Data, 0, Res).
 part2(Data, Res) :-
-  findall(X,
+  sumall(X,
     ( chunks(Data, 3, [A,B,C]),
       once((
         member(X, A),
         member(X, B),
         member(X, C)
       )) ),
-    Xs),
-    sum_list(Xs, Res).
+    Res).
