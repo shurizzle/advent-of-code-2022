@@ -1,8 +1,11 @@
-:- module('9', [parse//1, solution/3, test_parse/1, run/3]).
+:- module('10', [parse//1, part1/2, part2/2]).
 
 :- use_module(library(charsio)).
 :- use_module(library(lists)).
 :- use_module(library(ordsets)).
+:- use_module(library(between)).
+:- use_module(aggregate).
+:- use_module(lists_ext).
 
 blank --> [C], { char_type(C, whitespace) }.
 blanks --> blank, !, blanks.
@@ -54,4 +57,47 @@ run([Op|Ops], I0, X0, I, X) :-
 
 run(Ops, I, X) :- run(Ops, 0, 1, I, X).
 
-solution(_,_,_).
+indexes(20).
+indexes(60).
+indexes(100).
+indexes(140).
+indexes(180).
+indexes(220).
+
+indexes((I0, X), Acc0, Acc) :-
+  I1 is I0+1,
+  (   indexes(I1)
+  ->  Acc is Acc0+I1*X
+  ;   Acc is Acc0
+  ).
+
+part1(Data, Res) :-
+  foldall(indexes, (I,X), run(Data, I, X), 0, Res).
+
+write_canvas((I0, X), Canvas0, Canvas) :-
+  Pos is I0 mod 40,
+  (   Start is max(0, X-1),
+      Stop is min(X+1, 39),
+      between(Start, Stop, Pos)
+  ->  replace0(I0, Canvas0, '#', Canvas)
+  ;   Canvas = Canvas0
+  ).
+
+canvas_line_size(L) :- length(L, 40).
+
+nl_joiner(S2, S1, S) :-
+  append([S1, "\n" ,S2], S).
+
+canvas_string(Canvas, String) :-
+  length(Lines, 6),
+  maplist(canvas_line_size, Lines),
+  append(Lines, Canvas),
+  foldl1(nl_joiner, Lines, String).
+
+part2(Data, Res) :-
+  L is 40*6,
+  length(Canvas0, L),
+  maplist(=(' '), Canvas0),
+  foldall(write_canvas, (I,X), run(Data, I, X), Canvas0, Canvas),
+  canvas_string(Canvas, Res0),
+  append("\n", Res0, Res).

@@ -1,4 +1,6 @@
-:- module(lists_ext, [exclude/3, scanl/4]).
+:- module(lists_ext, [exclude/3, scanl/4, foldl1/3, replace0/4]).
+
+:- use_module(library(lists)).
 
 :- meta_predicate exclude(1, ?, ?).
 
@@ -21,3 +23,12 @@ scanl_([], _, _, []).
 scanl_([H|T], Goal, V, [VH|VT]) :-
   call(Goal, H, V, VH),
   scanl_(T, Goal, VH, VT).
+
+:- meta_predicate foldl1(3, ?, ?).
+
+foldl1(Goal, [V0|List], V) :-
+  foldl(Goal, List, V0, V).
+
+replace0(I, L, E, K) :-
+  nth0(I, L, _, R),
+  nth0(I, K, E, R).
