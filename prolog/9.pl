@@ -1,5 +1,4 @@
-:- module('9', [parse//1, part1/2, part2/2
-              , test1/1, test2/1]).
+:- module('9', [parse//1, test1/1, test2/1, solution/3]).
 
 :- use_module(library(charsio)).
 :- use_module(library(lists)).
@@ -110,3 +109,5 @@ run(Instructions, (L2, L10)) :-
 
 part1(Data, Res) :- run(Data, (Res, _)).
 part2(Data, Res) :- run(Data, (_, Res)).
+
+solution(Data, One, Two) :- run(Data, (One, Two)).
