@@ -10,7 +10,7 @@ foldall_nesting(Value, C, ID) :-
   number_chars(C, Cs),
   atom_chars(Atom, Cs),
   atom_concat(i_foldall_nesting_, Atom, ID),
-  bb_put(ID, Value),
+  bb_put(ID, +Value),
   bb_put(i_foldall_counter, C).
 
 :- meta_predicate foldall(3, ?, 0, ?, ?).
@@ -19,7 +19,7 @@ foldall(Reducer, Template, Goal, V0, V) :-
   foldall_nesting(V0, C, ID),
   (   setup_call_cleanup(true,
                          (   Goal,
-                             bb_get(ID, V1),
+                             bb_get(ID, +V1),
                              (    call(Reducer, Template, V1, V2)
                              ->   bb_put(ID, +V2)
                              ;    bb_put(ID, false), !
