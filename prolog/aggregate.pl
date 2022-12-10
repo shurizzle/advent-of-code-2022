@@ -1,5 +1,9 @@
 :- module(aggregate, [foldall/5, countall/3, sumall/3]).
 
+:- meta_predicate foldall(3, ?, 0, ?, ?).
+:- meta_predicate countall(?, 0, ?).
+:- meta_predicate sumall(?, 0, ?).
+
 :- use_module(library(iso_ext)).
 
 foldall_nesting(Value, C, ID) :-
@@ -12,10 +16,6 @@ foldall_nesting(Value, C, ID) :-
   atom_concat(i_foldall_nesting_, Atom, ID),
   bb_put(ID, +Value),
   bb_put(i_foldall_counter, C).
-
-:- meta_predicate foldall(3, ?, 0, ?, ?).
-:- meta_predicate countall(?, 0, ?).
-:- meta_predicate sumall(?, 0, ?).
 
 foldall(Reducer, Template, Goal, V0, V) :-
   foldall_nesting(V0, C, ID),
