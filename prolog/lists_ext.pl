@@ -1,4 +1,4 @@
-:- module(lists_ext, [exclude/3, scanl/4, foldl1/3, replace0/4]).
+:- module(lists_ext, [exclude/3, scanl/4, foldl1/3, replace0/4, mul_list/2]).
 
 :- use_module(library(lists)).
 
@@ -32,3 +32,14 @@ foldl1(Goal, [V0|List], V) :-
 replace0(I, L, E, K) :-
   nth0(I, L, _, R),
   nth0(I, K, E, R).
+
+times(A,B,C) :-
+  (   var(A)
+  ->  A is C/B
+  ;   var(B)
+  ->  B is C/A
+  ;   C is A*B
+  ).
+
+mul_list(Xs, Res) :-
+  foldl1(times, Xs, Res).
