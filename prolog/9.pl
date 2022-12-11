@@ -52,15 +52,6 @@ test_data2(Data) :- test_input2(I), phrase(parse(Data), I).
 test1(Res) :- test_data1(Data), part1(Data, Res).
 test2(Res) :- test_data2(Data), part2(Data, Res).
 
-unroll_instructions(Insts, Direction) :-
-  member((D * T), Insts),
-  unroll_instructions_(D, T, Direction).
-unroll_instructions_(_, 0, _) :- !, fail.
-unroll_instructions_(D, _, D).
-unroll_instructions_(D, T0, Direction) :-
-  T is T0-1,
-  unroll_instructions_(D, T, Direction).
-
 clamp(Min, Max, V0, V) :-
   V is min(Max, max(Min, V0)).
 
@@ -94,6 +85,14 @@ make_state(P, Knots, (Pos2, Pos10, Points)) :-
 
 initial_state(State) :- make_state((0, 0), 10, State).
 
+fold_instructions(_, [], Value, Value) :- !.
+fold_instructions(Goal, [(_ * 0)|R], V0, Value) :- !,
+  fold_instructions(Goal, R, V0, Value).
+fold_instructions(Goal, [(D * T0)|R], V0, Value) :-
+  call(Goal, D, V0, V1),
+  T is T0 - 1,
+  fold_instructions(Goal, [(D * T)|R], V1, Value).
+
 step(Direction, (Pos20, Pos100, Points0), (Pos2, Pos10, Points)) :-
   evolve(Points0, Direction, Points),
   nth1(2, Points, P2),
@@ -103,7 +102,7 @@ step(Direction, (Pos20, Pos100, Points0), (Pos2, Pos10, Points)) :-
 
 run(Instructions, (L2, L10)) :-
   initial_state(State0),
-  foldall(step, Direction, unroll_instructions(Instructions, Direction), State0, (Pos2, Pos10, _)),
+  fold_instructions(step, Instructions, State0, (Pos2, Pos10, _)),
   length(Pos2, L2),
   length(Pos10, L10).
 
