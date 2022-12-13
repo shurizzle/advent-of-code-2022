@@ -1,4 +1,5 @@
-:- module(lists_ext, [exclude/3, scanl/4, foldl1/3, replace0/4, mul_list/2]).
+:- module(lists_ext, [exclude/3, scanl/4, foldl1/3, replace0/4, mul_list/2
+                    , flatten/2]).
 
 :- use_module(library(lists)).
 
@@ -43,3 +44,15 @@ times(A,B,C) :-
 
 mul_list(Xs, Res) :-
   foldl1(times, Xs, Res).
+
+flatten(List, FlatList) :-
+  flatten(List, [], FlatList0), !,
+  FlatList = FlatList0.
+
+flatten(Var, Tl, [Var|Tl]) :-
+  var(Var), !.
+flatten([], Tl, Tl) :- !.
+flatten([Hd|Tl], Tail, List) :- !,
+  flatten(Hd, FlatHeadTail, List),
+  flatten(Tl, Tail, FlatHeadTail).
+flatten(NonList, Tl, [NonList|Tl]).

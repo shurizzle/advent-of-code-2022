@@ -1,10 +1,12 @@
-:- module(aggregate, [foldall/5, countall/3, sumall/3]).
+:- module(aggregate, [foldall/5, countall/3, sumall/3, minall/3]).
 
 :- meta_predicate foldall(3, ?, 0, ?, ?).
 :- meta_predicate countall(?, 0, ?).
 :- meta_predicate sumall(?, 0, ?).
+:- meta_predicate minall(?, 0, ?).
 
 :- use_module(library(iso_ext)).
+:- use_module(library(dif)).
 
 foldall_nesting(Value, C, ID) :-
   (   bb_get(i_foldall_counter, C0) ->
@@ -42,8 +44,19 @@ count_(_, Acc0, Acc) :- Acc is Acc0+1.
 
 sum_(V, Acc0, Acc) :- Acc is Acc0+V.
 
+min_(V, Acc0, Acc) :-
+  (   Acc0 == nil
+  ->  Acc = V
+  ;   Acc is min(Acc0, V)
+  ).
+
 countall(Template, Goal, V) :-
   foldall(aggregate:count_, Template, Goal, 0, V).
 
 sumall(Template, Goal, V) :-
   foldall(aggregate:sum_, Template, Goal, 0, V).
+
+minall(Template, Goal, V) :-
+  foldall(aggregate:min_, Template, Goal, nil, V0),
+  dif(V0, nil),
+  V = V0.
