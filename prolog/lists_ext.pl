@@ -1,5 +1,5 @@
 :- module(lists_ext, [exclude/3, scanl/4, foldl1/3, replace0/4, mul_list/2
-                    , flatten/2]).
+                    , flatten/2, is_list/1]).
 
 :- use_module(library(lists)).
 
@@ -56,3 +56,10 @@ flatten([Hd|Tl], Tail, List) :- !,
   flatten(Hd, FlatHeadTail, List),
   flatten(Tl, Tail, FlatHeadTail).
 flatten(NonList, Tl, [NonList|Tl]).
+
+is_list(X) :-
+  var(X), !,
+  fail.
+is_list([]).
+is_list([_|T]) :-
+  is_list(T).
