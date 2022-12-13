@@ -98,10 +98,9 @@ list_to_ol_([], Res, Res) :- !.
 list_to_ol_([E|List], Acc0, Res) :-
   ol_add(Acc0, E, Acc),
   list_to_ol_(List, Acc, Res).
-% }}}
 
-:- use_module(library(debug)).
-:- use_module(library(format)).
+ol_index1(List, E, Res) :- binary_search1(List, E, found(Res)).
+% }}}
 
 part1(Data, Res) :-
   length(Data, Len),
@@ -114,8 +113,8 @@ part1(Data, Res) :-
   ), Res).
 part2(Data, Res) :-
   foldl1(append, Data, Flat0),
-  append(Flat0, [[[2]], [[6]]], Flat),
+  Dividers = [[[2]], [[6]]],
+  append(Flat0, Dividers, Flat),
   list_to_ol(Flat, List),
-  binary_search1(List, [[2]], found(I1)),
-  binary_search1(List, [[6]], found(I2)),
-  Res is I1 * I2.
+  maplist(ol_index1(List), Dividers, Indexes),
+  mul_list(Indexes, Res).
